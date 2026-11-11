@@ -56,3 +56,7 @@ Ein erzeugtes Bild kann eine Szene tragen: `<img src="img/NAME.png" class="xv-ab
 - Gleiche Farben wie die Seite, wenn der Nutzer keine eigenen will (Tokens `--xv-…` oben im Template).
 - Element wird mehrfach animiert? Erst `from`, dann später `to`. Nie zwei Tweens gleichzeitig auf dieselbe Eigenschaft.
 - Prüfen vor dem Veröffentlichen: einmal an 3–4 Stellen spulen (Regler) und schauen, ob jede Szene vollständig aussieht.
+
+## Mehrere Videos auf einer Seite
+
+Jeder Baustein findet sein eigenes `.xv`-Element (das direkt vor seinen Script-Tags). Für ein zweites Video: Block erneut einfügen, am `.xv`-Element `data-vo="VO2"` setzen und `vo.js` im Script-Tag durch `vo2.js` ersetzen (gebaut mit `window.VO2=[…]`). Keine `id`-Attribute in Szenen verwenden; Elemente mit `data-k="name"` markieren und mit `sc.querySelector("[data-k=name]")` holen.

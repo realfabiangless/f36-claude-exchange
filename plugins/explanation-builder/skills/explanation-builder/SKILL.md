@@ -18,13 +18,13 @@ Was sich ändert, ist alles andere: Themen, Leser, Anlässe, Abschnitte, Quellen
 ## Ablauf
 
 ### Phase 0: Bestehenden Skill prüfen
-Gibt es `~/.claude/skills/Explanation/SKILL.md` schon? Dann frag, ob du ihn **anpassen** (Interview nur zu den Punkten, die sich ändern sollen) oder **neu bauen** willst. Vor dem Überschreiben eine Kopie nach `~/.claude/skills/Explanation.backup-<datum>/` legen.
+Gibt es `~/.claude/skills/Explanation/SKILL.md` schon? Dann frag, ob du ihn **anpassen** (Interview nur zu den Punkten, die sich ändern sollen) oder **neu bauen** willst. Vor dem Überschreiben eine Kopie nach `~/.claude/skill-backups/Explanation-<datum>/` legen. Nie innerhalb von `~/.claude/skills/`: dort würde Claude die Kopie als zweiten Skill mit demselben Namen laden.
 
 ### Phase 1: Werkzeug-Check
 Folge `References/CapabilityCheck.md`. Ergebnis als kurze Tabelle zeigen: was da ist, was fehlt, was das für den Skill bedeutet. Keys nie ausgeben, nur „gefunden / gültig / ungültig“.
 
 ### Phase 2: Interview
-Folge `References/InterviewGuide.md`. Eine Frage nach der anderen, mit Antwortoptionen (AskUserQuestion, wo verfügbar). Höchstens 12 Fragen. Nach jedem Block in einem Satz zusammenfassen, was du verstanden hast.
+Folge `References/InterviewGuide.md`. Eine Frage nach der anderen, mit Antwortoptionen (AskUserQuestion, wo verfügbar). Höchstens 14 Fragen; überspring jede, die schon beantwortet ist. Nach jedem Block in einem Satz zusammenfassen, was du verstanden hast.
 
 ### Phase 3: Fehlendes einrichten
 Für alles, was in Phase 1 fehlt und laut Interview gebraucht wird:

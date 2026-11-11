@@ -1,11 +1,12 @@
 # Vorlage für die erzeugte SKILL.md
 
-Ersetze jedes `{{…}}` mit Antworten aus dem Interview. Streiche Zeilen, die für diesen Nutzer nicht gelten. Schreib in der Sprache des Nutzers, kurze Sätze. Alles zwischen den Linien `=====` wird die Datei.
+Ersetze jedes `{{…}}` mit Antworten aus dem Interview. Die `description` steht als YAML-Block (`>-`), damit Anführungszeichen und Doppelpunkte aus den Antworten die Datei nicht kaputt machen; jede Zeile darunter mit zwei Leerzeichen einrücken. Streiche Zeilen, die für diesen Nutzer nicht gelten. Schreib in der Sprache des Nutzers, kurze Sätze. Alles zwischen den Linien `=====` wird die Datei.
 
 =====
 ---
 name: Explanation
-description: "Erklärt {{Name}} ein Thema als Seite mit Diagrammen, {{Bildern, }}und einem Erklärvideo mit Sprecherstimme. Typische Anlässe: {{Anlässe aus A2}}. Beispiele: {{2–3 Themen aus A3}}. USE WHEN /explanation, erklär mir das, mach mir eine Übersicht, visualisiere das, {{eigene Auslöser des Nutzers}}. NOT FOR Texte, die weiter bearbeitet werden sollen, oder reine Tabellen."
+description: >-
+  Erklärt {{Name}} ein Thema als Seite mit Diagrammen, {{Bildern, }}und einem Erklärvideo mit Sprecherstimme. Typische Anlässe: {{Anlässe aus A2}}. Beispiele: {{2–3 Themen aus A3}}. USE WHEN /explanation, erklär mir das, mach mir eine Übersicht, visualisiere das, {{eigene Auslöser des Nutzers}}. NOT FOR Texte, die weiter bearbeitet werden sollen, oder reine Tabellen.
 ---
 
 # Explanation

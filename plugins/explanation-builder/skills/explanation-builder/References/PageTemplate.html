@@ -58,6 +58,7 @@ dl.glossary dt { font-weight: 600 }
 dl.glossary dd { margin: 0; min-width: 0 }
 @media (max-width: 520px) { dl.glossary { grid-template-columns: 1fr; gap: 2px } dl.glossary dd { margin-bottom: 10px } }
 
+[hidden] { display: none !important }
 #ask { position: absolute; z-index: 20; background: var(--fg); color: var(--bg); border: 0; box-shadow: 0 4px 14px rgb(0 0 0 / 0.2) }
 #hint { font-size: 13px; color: var(--muted) }
 </style>
@@ -93,7 +94,7 @@ dl.glossary dd { margin: 0; min-width: 0 }
     <p>{{Erklärung}}</p>
     <!-- Optional, nur mit Bild-API: -->
     <div class="figure">
-      <img src="img/{{name}}.png" alt="{{Was auf dem Bild zu sehen ist}}">
+      <img src="img/{{name}}.{{png oder jpg, wie die Datei heißt}}" alt="{{Was auf dem Bild zu sehen ist}}">
       <p class="caption">{{Was man auf dem Bild sehen soll}}</p>
     </div>
   </section>

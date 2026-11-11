@@ -12,6 +12,7 @@
 .xv-screen { position: relative; aspect-ratio: 16 / 9; max-width: 100%; background: var(--xv-bg); overflow: hidden; }
 .xv-screen:fullscreen { aspect-ratio: auto; width: 100vw; height: 100vh; }
 .xv-stage { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; transform-origin: 0 0; overflow: hidden; color: var(--xv-text); font-family: var(--xv-display);
+  background: var(--xv-bg); /* Fallback für Browser ohne color-mix() */
   background: radial-gradient(900px 600px at 80% 10%, color-mix(in srgb, var(--xv-a4) 30%, transparent) 0%, transparent 70%), radial-gradient(800px 600px at 10% 100%, color-mix(in srgb, var(--xv-a1) 14%, transparent) 0%, transparent 65%), var(--xv-bg); }
 .xv-stage * { box-sizing: border-box; }
 .xv-dots { position: absolute; inset: -40px; background-image: radial-gradient(rgba(255,255,255,.09) 1.4px, transparent 1.6px); background-size: 32px 32px; }
@@ -52,7 +53,7 @@
 .xv button:focus-visible, .xv input:focus-visible { outline: 3px solid var(--xv-a2); outline-offset: 2px; }
 </style>
 
-<div class="xv" id="xv">
+<div class="xv" data-vo="VO"><!-- zweites Video auf derselben Seite: data-vo="VO2" und unten vo2.js -->
   <div class="xv-screen">
     <div class="xv-stage" aria-hidden="true">
       <div class="xv-dots"></div>
@@ -60,28 +61,28 @@
 
       <!-- Szene 1: Titel. data-caption = Sprechertext dieser Szene. data-min = Mindestlänge in Sekunden. -->
       <section class="xv-sc" data-name="Thema" data-min="4.5" data-caption="So entsteht bei uns ein Angebot. In drei Schritten und in zwei Tagen statt fünf.">
-        <div class="xv-abs xv-eyebrow" style="left:0;right:0;top:210px;text-align:center" id="xv-eb">Erklärt in 30 Sekunden</div>
+        <div class="xv-abs xv-eyebrow" style="left:0;right:0;top:210px;text-align:center" data-k="eb">Erklärt in 30 Sekunden</div>
         <div class="xv-abs" style="left:0;right:0;top:254px;text-align:center"><div class="xv-mask"><div class="xv-h1 xv-split">Wie ein <span style="color:var(--xv-a1)">Angebot</span> entsteht</div></div></div>
-        <svg class="xv-abs" style="left:390px;top:400px;overflow:visible" width="500" height="40" viewBox="0 0 500 40"><path id="xv-sq" d="M6 22 C 60 4, 110 36, 170 20 S 280 4, 340 20 S 440 36, 494 16" fill="none" stroke="var(--xv-a2)" stroke-width="7" stroke-linecap="round"/></svg>
+        <svg class="xv-abs" style="left:390px;top:400px;overflow:visible" width="500" height="40" viewBox="0 0 500 40"><path data-k="sq" d="M6 22 C 60 4, 110 36, 170 20 S 280 4, 340 20 S 440 36, 494 16" fill="none" stroke="var(--xv-a2)" stroke-width="7" stroke-linecap="round"/></svg>
       </section>
 
       <!-- Szene 2: Ablauf als Diagramm -->
       <section class="xv-sc" data-name="Ablauf" data-min="6" data-caption="Die Anfrage kommt rein, wir kalkulieren, und das Angebot geht raus. Jeder Schritt hat genau eine verantwortliche Person.">
-        <div class="xv-abs xv-h2" style="left:80px;top:90px" id="xv-s2h">Der Ablauf</div>
+        <div class="xv-abs xv-h2" style="left:80px;top:90px" data-k="s2h">Der Ablauf</div>
         <div class="xv-node" style="left:80px;top:290px"><b>Anfrage</b><span>Vertrieb</span></div>
         <div class="xv-node" style="left:500px;top:290px"><b>Kalkulation</b><span>Controlling</span></div>
         <div class="xv-node" style="left:920px;top:290px;border-color:var(--xv-a2)"><b>Angebot</b><span>Vertrieb</span></div>
         <svg class="xv-abs" style="left:0;top:0;overflow:visible" width="1280" height="720" viewBox="0 0 1280 720">
           <path class="xv-link" d="M368 365 L492 365" stroke="var(--xv-text)" stroke-width="4" stroke-linecap="round" fill="none"/>
           <path class="xv-link" d="M788 365 L912 365" stroke="var(--xv-text)" stroke-width="4" stroke-linecap="round" fill="none"/>
-          <path id="xv-route" d="M220 470 C 420 560, 860 560, 1060 470" fill="none" stroke="var(--xv-line)" stroke-width="3" stroke-dasharray="4 10"/>
-          <circle id="xv-dot" r="12" fill="var(--xv-a2)"/>
+          <path data-k="route" d="M220 470 C 420 560, 860 560, 1060 470" fill="none" stroke="var(--xv-line)" stroke-width="3" stroke-dasharray="4 10"/>
+          <circle data-k="dot" r="12" fill="var(--xv-a2)"/>
         </svg>
       </section>
 
       <!-- Szene 3: Zahlen -->
       <section class="xv-sc" data-name="Zahlen" data-min="6" data-caption="Früher hat das im Schnitt fünf Tage gedauert. Heute sind es zwei.">
-        <div class="xv-abs xv-h2" style="left:80px;top:90px" id="xv-s3h">Tage bis zum Angebot</div>
+        <div class="xv-abs xv-h2" style="left:80px;top:90px" data-k="s3h">Tage bis zum Angebot</div>
         <div class="xv-bar" style="left:430px;height:300px;background:var(--xv-line)"></div>
         <div class="xv-bar" style="left:700px;height:120px;background:var(--xv-a1)"></div>
         <div class="xv-val" style="left:430px;top:196px" data-to="5">0</div>
@@ -93,7 +94,7 @@
       <!-- Szene 4: Fazit -->
       <section class="xv-sc" data-name="Fazit" data-min="4.5" data-caption="Klarer Ablauf, klare Zuständigkeit, schnelleres Angebot.">
         <div class="xv-abs xv-kw"><div class="xv-mask"><div class="xv-kwi" style="color:var(--xv-a1)">Klar.</div></div><div class="xv-mask"><div class="xv-kwi" style="color:var(--xv-a2)">Zuständig.</div></div><div class="xv-mask"><div class="xv-kwi" style="color:var(--xv-a3)">Schneller.</div></div></div>
-        <div class="xv-abs xv-sub" style="left:0;right:0;top:430px;text-align:center" id="xv-out">Drei Schritte, zwei Tage.</div>
+        <div class="xv-abs xv-sub" style="left:0;right:0;top:430px;text-align:center" data-k="out">Drei Schritte, zwei Tage.</div>
       </section>
 
       <div class="xv-wipe"><b></b><b></b><b></b></div>
@@ -117,7 +118,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script>
 (function () {
-  var root = document.getElementById("xv");
+  // zugehöriges Video finden: das .xv direkt vor diesen Script-Tags (so laufen mehrere Videos auf einer Seite)
+  var root = document.currentScript; while (root && !(root.classList && root.classList.contains("xv"))) root = root.previousElementSibling;
+  if (!root) return;
   var $ = function (s) { return root.querySelector(s); }, $$ = function (s) { return Array.prototype.slice.call(root.querySelectorAll(s)); };
   var screen = $(".xv-screen"), stage = $(".xv-stage");
   gsap.config({ force3D: false });
@@ -151,21 +154,21 @@
   // ===== Szenen: build(tl, T, sc) baut die Animation ab Startzeit T. sfx: [Sekunde in der Szene, Effekt] =====
   var SCENES = [
     { sfx: [[0.6, "pop"], [1.5, "chime"]], build: function (tl, T, sc) {
-      tl.from(sc.querySelector("#xv-eb"), { opacity: 0, y: 14, duration: 0.6 }, T + 0.1)
+      tl.from(sc.querySelector("[data-k=eb]"), { opacity: 0, y: 14, duration: 0.6 }, T + 0.1)
         .from(chars(sc), { yPercent: 115, duration: 0.9, stagger: 0.03, ease: "power4.out" }, T + 0.35);
-      var sq = sc.querySelector("#xv-sq"); draw(sq);
+      var sq = sc.querySelector("[data-k=sq]"); draw(sq);
       tl.to(sq, { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }, T + 1.4);
     } },
     { sfx: [[0.6, "pop", 520], [1.0, "pop", 640], [1.4, "pop", 760], [3.4, "chime"]], build: function (tl, T, sc) {
-      tl.from(sc.querySelector("#xv-s2h"), { x: -40, opacity: 0, duration: 0.7 }, T + 0.1)
+      tl.from(sc.querySelector("[data-k=s2h]"), { x: -40, opacity: 0, duration: 0.7 }, T + 0.1)
         .from(sc.querySelectorAll(".xv-node"), { scale: 0.5, opacity: 0, duration: 0.6, stagger: 0.4, ease: "back.out(2.2)" }, T + 0.6);
       sc.querySelectorAll(".xv-link").forEach(function (p, i) { draw(p); tl.to(p, { strokeDashoffset: 0, duration: 0.35 }, T + 0.85 + i * 0.4); });
-      var route = sc.querySelector("#xv-route"), dot = sc.querySelector("#xv-dot"), L = route.getTotalLength(), P = { p: 0 };
+      var route = sc.querySelector("[data-k=route]"), dot = sc.querySelector("[data-k=dot]"), L = route.getTotalLength(), P = { p: 0 };
       tl.from(route, { opacity: 0, duration: 0.4 }, T + 1.9).to(P, { p: 1, duration: 1.6, ease: "power2.inOut" }, T + 2.0);
       binds.push(function () { var pt = route.getPointAtLength(L * P.p); dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y); dot.style.opacity = P.p > 0 && P.p < 1 ? 1 : 0; });
     } },
     { sfx: [[0.6, "tick"], [1.0, "tick"], [2.6, "chime"]], build: function (tl, T, sc) {
-      tl.from(sc.querySelector("#xv-s3h"), { x: -40, opacity: 0, duration: 0.7 }, T + 0.1)
+      tl.from(sc.querySelector("[data-k=s3h]"), { x: -40, opacity: 0, duration: 0.7 }, T + 0.1)
         .from(sc.querySelectorAll(".xv-bar"), { scaleY: 0, duration: 1.1, stagger: 0.5, ease: "expo.out" }, T + 0.5)
         .from(sc.querySelectorAll(".xv-lbl"), { opacity: 0, y: 10, duration: 0.5, stagger: 0.5 }, T + 0.6);
       sc.querySelectorAll(".xv-val").forEach(function (v, i) {
@@ -176,12 +179,12 @@
     } },
     { sfx: [[0.3, "pop", 600], [0.5, "pop", 750], [0.7, "pop", 900]], build: function (tl, T, sc) {
       tl.from(sc.querySelectorAll(".xv-kwi"), { yPercent: 110, duration: 0.7, stagger: 0.2, ease: "power4.out" }, T + 0.3)
-        .from(sc.querySelector("#xv-out"), { opacity: 0, y: 12, duration: 0.6 }, T + 1.3);
+        .from(sc.querySelector("[data-k=out]"), { opacity: 0, y: 12, duration: 0.6 }, T + 1.3);
     } }
   ];
 
   // ===== Motor: Länge jeder Szene = max(Mindestlänge, Sprecherclip + Puffer) =====
-  var scEls = $$(".xv-sc"), VO = window.VO || [];
+  var scEls = $$(".xv-sc"), VO = window[root.dataset.vo || "VO"] || [];
   var clips = scEls.map(function (_, i) { if (!VO[i]) return null; var a = new Audio(); a.preload = "auto"; a.src = VO[i]; return a; });
   var meta = clips.map(function (a) { return a ? new Promise(function (res) { if (a.readyState >= 1) return res(); a.addEventListener("loadedmetadata", res, { once: true }); a.addEventListener("error", res, { once: true }); setTimeout(res, 4000); }) : Promise.resolve(); });
   Promise.all(meta).then(init);
@@ -198,7 +201,7 @@
     var dotsEls = $$(".xv-progress i");
 
     gsap.set(scEls.slice(1), { autoAlpha: 0 });
-    gsap.set(".xv-wipe b", { skewX: -14, xPercent: -120, autoAlpha: 1 });
+    gsap.set(root.querySelectorAll(".xv-wipe b"), { skewX: -14, xPercent: -120, autoAlpha: 1 });
     var tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
     var cues = [];
     scEls.forEach(function (sc, i) {
@@ -274,8 +277,8 @@
     $("[data-xv=mute]").addEventListener("click", function () { muted = !muted; this.textContent = muted ? "Ton aus" : "Ton an"; this.setAttribute("aria-pressed", String(muted)); stopVo(); render(); });
     $("[data-xv=fs]").addEventListener("click", function () { try { var p = screen.requestFullscreen && screen.requestFullscreen(); if (p && p.catch) p.catch(function () {}); } catch (e) {} });
     document.addEventListener("fullscreenchange", fit);
-    if (!clips.some(Boolean)) big.lastChild.textContent = "Abspielen (ohne Stimme)";
-    else big.lastChild.textContent = "Abspielen · " + Math.round(END) + " s mit Ton";
+    var voiced = clips.filter(function (a) { return a && isFinite(a.duration) && a.duration > 0; }).length;
+    big.lastChild.textContent = voiced === 0 ? "Abspielen (ohne Stimme)" : voiced < scEls.length ? "Abspielen · " + Math.round(END) + " s, Stimme in " + voiced + " von " + scEls.length + " Szenen" : "Abspielen · " + Math.round(END) + " s mit Ton";
     // Ruhebild: Titel fertig aufgebaut
     seek(Math.min(starts[1] || END, 2.6) - 0.05);
   }

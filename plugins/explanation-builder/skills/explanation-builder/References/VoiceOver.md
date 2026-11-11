@@ -53,18 +53,22 @@ curl -s https://api.elevenlabs.io/v1/voices -H "xi-api-key: $ELEVENLABS_API_KEY"
 Clip erzeugen (für jede Szene `N` und ihren Text):
 
 ```bash
-jq -n --arg t "TEXT DER SZENE" '{text:$t, model_id:"eleven_multilingual_v2", voice_settings:{stability:0.5, similarity_boost:0.75}}' \
+code=$(jq -n --arg t "TEXT DER SZENE" '{text:$t, model_id:"eleven_multilingual_v2", voice_settings:{stability:0.5, similarity_boost:0.75}}' \
  | curl -s -X POST "https://api.elevenlabs.io/v1/text-to-speech/VOICE_ID?output_format=mp3_44100_64" \
-   -H "xi-api-key: $ELEVENLABS_API_KEY" -H "content-type: application/json" -d @- -o vo/sNN.mp3
+   -H "xi-api-key: $ELEVENLABS_API_KEY" -H "content-type: application/json" -d @- -o vo/sNN.mp3 -w "%{http_code}")
+[ "$code" = 200 ] && echo "sNN ok" || { echo "sNN FEHLER $code: $(head -c 300 vo/sNN.mp3)"; rm -f vo/sNN.mp3; }
 ```
+
+Bei `FEHLER` die Meldung dem Nutzer zeigen (401 = Key ungültig, 429/quota = Kontingent aufgebraucht). Nicht still ohne Stimme weitermachen.
 
 ### OpenAI
 
 Stimmen: `alloy`, `nova`, `onyx`, `shimmer`, `ash`, `coral`. Ton per `instructions` steuern.
 
 ```bash
-jq -n --arg t "TEXT DER SZENE" '{model:"gpt-4o-mini-tts", voice:"nova", input:$t, instructions:"Ruhig und klar, wie eine gute Erklärerin. Deutsch.", response_format:"mp3"}' \
- | curl -s https://api.openai.com/v1/audio/speech -H "Authorization: Bearer $OPENAI_API_KEY" -H "content-type: application/json" -d @- -o vo/sNN.mp3
+code=$(jq -n --arg t "TEXT DER SZENE" '{model:"gpt-4o-mini-tts", voice:"nova", input:$t, instructions:"Ruhig und klar, wie eine gute Erklärerin. Deutsch.", response_format:"mp3"}' \
+ | curl -s https://api.openai.com/v1/audio/speech -H "Authorization: Bearer $OPENAI_API_KEY" -H "content-type: application/json" -d @- -o vo/sNN.mp3 -w "%{http_code}")
+[ "$code" = 200 ] && echo "sNN ok" || { echo "sNN FEHLER $code: $(head -c 300 vo/sNN.mp3)"; rm -f vo/sNN.mp3; }
 ```
 
 ### Gemini
@@ -81,8 +85,9 @@ Clip erzeugen (Modellname aus der Liste, ohne `models/`):
 G=${GEMINI_API_KEY:-$GOOGLE_API_KEY}
 jq -n --arg t "Sprich ruhig und klar: TEXT DER SZENE" '{contents:[{parts:[{text:$t}]}], generationConfig:{responseModalities:["AUDIO"], speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName:"Kore"}}}}}' \
  | curl -s "https://generativelanguage.googleapis.com/v1beta/models/MODELL:generateContent?key=$G" -H "content-type: application/json" -d @- > vo/sNN.json
-jq -r '.candidates[0].content.parts[0].inlineData.mimeType' vo/sNN.json
-jq -r '.candidates[0].content.parts[0].inlineData.data' vo/sNN.json | base64 -d > vo/sNN.wav && rm vo/sNN.json
+m=$(jq -r '.candidates[0].content.parts[0].inlineData.mimeType // empty' vo/sNN.json)
+if [ -z "$m" ]; then echo "sNN FEHLER: $(jq -r '.error.message // "keine Audiodaten"' vo/sNN.json)"; rm vo/sNN.json
+else echo "sNN $m"; jq -r '.candidates[0].content.parts[0].inlineData.data' vo/sNN.json | base64 -d > vo/sNN.wav && rm vo/sNN.json; fi
 ```
 
 Ist der ausgegebene Typ `audio/wav`, bist du fertig. Ist es rohes PCM (`audio/L16` oder `audio/pcm`), die Datei in `vo/sNN.pcm` umbenennen und so in WAV verpacken (44-Byte-Header, 24 kHz, 16 bit, mono):
@@ -95,19 +100,19 @@ le32() { printf "\\x$(printf %02x $(($1&255)))\\x$(printf %02x $((($1>>8)&255)))
 
 ## vo.js bauen
 
-Packt alle Clips in eine Datei, die das Video lädt:
+Packt alle Clips in eine Datei, die das Video lädt. `n` = Anzahl Szenen im Video. Fehlt der Clip einer Szene, steht an ihrer Stelle `null`, damit alle anderen Clips bei ihrer Szene bleiben:
 
 ```bash
-{ printf 'window.VO=['; sep=''; for f in $(ls vo | grep -E '^s[0-9]+\.(mp3|wav)$' | sort); do f="vo/$f"; case "$f" in *.wav) m=audio/wav;; *) m=audio/mpeg;; esac; printf '%s"data:%s;base64,' "$sep" "$m"; base64 < "$f" | tr -d '\n'; printf '"'; sep=','; done; printf '];\n'; } > vo.js
+n=4; { printf 'window.VO=['; for i in $(seq 1 $n); do s=$(printf %02d $i); [ $i -gt 1 ] && printf ','; if [ -f vo/s$s.mp3 ]; then printf '"data:audio/mpeg;base64,'; base64 < vo/s$s.mp3 | tr -d '\n'; printf '"'; elif [ -f vo/s$s.wav ]; then printf '"data:audio/wav;base64,'; base64 < vo/s$s.wav | tr -d '\n'; printf '"'; else printf 'null'; echo "Szene $s ohne Clip" >&2; fi; done; printf '];\n'; } > vo.js
 ```
 
-Alle Clips einer Erklärung kommen vom selben Anbieter, also entweder nur `.mp3` oder nur `.wav`. Sonst stimmt die Reihenfolge nicht.
+Zwei Videos auf einer Seite: Für das zweite die Variable `window.VO2` und die Datei `vo2.js` verwenden (siehe `VideoGuide.md`).
 
 `vo.js` liegt neben der HTML-Seite. Beim Veröffentlichen als Artifact wird sie über `files` mitgeschickt (`{"vo.js": "<pfad>/vo.js"}`). Als lokale Datei reicht es, dass sie im selben Ordner liegt.
 
 ## Regeln
 
-- Anzahl Clips = Anzahl Szenen. Fehlt ein Clip, läuft die Szene ohne Stimme mit ihrer Mindestlänge.
+- Clip `sNN` gehört zur Szene NN (zweistellig, ab 01). Fehlt ein Clip, läuft nur diese Szene ohne Stimme mit ihrer Mindestlänge; dem Nutzer sagen, welche.
 - Sprechertext kurz halten: 1–2 Sätze pro Szene, 8–12 Sekunden höchstens.
 - Zahlen und Abkürzungen so schreiben, wie sie gesprochen werden („zwei Tage“, „K-P-I“), in der Untertitel-Variante darf es kürzer sein; dann `data-caption` für die Untertitel und den gesprochenen Text getrennt halten.
 - Schlägt ein Aufruf fehl (leere oder sehr kleine Datei): Status zeigen, nicht stillschweigend ohne Stimme weitermachen.

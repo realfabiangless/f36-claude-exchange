@@ -47,7 +47,7 @@ head -c 7 img/NAME.b64
 base64 -d < img/NAME.b64 > img/NAME.jpg && rm img/NAME.b64
 ```
 
-Gemini liefert meist JPEG, OpenAI PNG. `file img/NAME.*` zeigt das Format.
+Gemini liefert meist JPEG, OpenAI PNG. `file img/NAME.*` zeigt das Format. Im `src` der Seite immer die echte Endung verwenden.
 
 ## Prompt-Aufbau
 
@@ -57,7 +57,7 @@ Beispiel: „Flache Illustration mit klaren Flächen und wenigen Farben. Ein Sta
 
 ## In die Seite bringen
 
-- **Artifact:** Bild über `files` mitschicken (`{"img/NAME.png": "<pfad>"}`) und in der Seite als `<img src="img/NAME.png" alt="…">` einbinden.
+- **Artifact:** Bild über `files` mitschicken (`{"img/NAME.png": "<pfad>"}`) und in der Seite als `<img src="img/NAME.png" alt="…">` einbinden. Bei Gemini `.jpg` statt `.png`.
 - **Lokale Datei:** Bild im Ordner `img/` neben der HTML-Seite lassen, gleicher `src`.
 
 Scheitert ein Bild oder dauert es länger als 2 Minuten: ohne Bild weitermachen und am Ende sagen, welches fehlt und warum.
