@@ -1,0 +1,10 @@
+.DS_Store
+node_modules/
+
+# Persönliche Outputs aus dem EO-Coaching-Wiki bleiben lokal
+eo-coaching/wiki/notes/*
+!eo-coaching/wiki/notes/.gitkeep
+eo-coaching/outputs/*
+!eo-coaching/outputs/README.md
+eo-coaching/raw/inbox/*
+!eo-coaching/raw/inbox/README.md

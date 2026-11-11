@@ -1,0 +1,17 @@
+name: Validate marketplace
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Check marketplace structure
+        run: bun scripts/check-marketplace.ts
+      - name: Claude Code plugin validate
+        run: bunx @anthropic-ai/claude-code plugin validate .

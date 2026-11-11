@@ -1,0 +1,5 @@
+{
+  "name": "skill-einreichen",
+  "description": "Verpackt einen deiner Skills als Plugin für den F36 Claude Exchange und bereitet den Pull Request vor.",
+  "author": { "name": "Fabian Gless" }
+}
