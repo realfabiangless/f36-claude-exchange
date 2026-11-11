@@ -1,0 +1,215 @@
+<title>{{Name des Themas}}</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: eine Lesespalte, Entscheidungskarten etwas breiter. Farben und Schriften aus dem Interview (E2) hier eintragen. */
+:root {
+  --bg: #F5F4F8; --surface: #FFFFFF; --fg: #1A1826; --muted: #5E5B72; --line: #DCDAE6;
+  --accent: #0E8F78; --accent-soft: #D6F1EA; --warn: #a2611a; --warn-soft: #f7e8d3;
+  --font-display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0F0E16; --surface: #181624; --fg: #ECEAF5; --muted: #A09CB8; --line: #2A2740;
+  --accent: #4FE3C1; --accent-soft: #163A33; --warn: #e3a35b; --warn-soft: #3a2a17; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0F0E16; --surface: #181624; --fg: #ECEAF5; --muted: #A09CB8; --line: #2A2740;
+  --accent: #4FE3C1; --accent-soft: #163A33; --warn: #e3a35b; --warn-soft: #3a2a17; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font: 16px/1.6 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 96px }
+main { max-width: 760px; margin: 0 auto; display: grid; gap: 48px }
+section { display: grid; gap: 14px; min-width: 0 }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; text-wrap: balance; margin: 0 }
+h1 { font-size: clamp(30px, 5vw, 44px) }
+h2 { font-size: 26px }
+h3 { font-size: 19px }
+p, ul, ol { margin: 0 }
+a { color: var(--accent); text-underline-offset: 2px }
+code { font: 0.88em var(--font-mono); background: var(--accent-soft); padding: 1px 5px; border-radius: 4px }
+pre { font: 13px/1.5 var(--font-mono); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; overflow-x: auto; margin: 0 }
+.eyebrow { font: 500 12px var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted) }
+.tldr { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: grid; gap: 8px }
+.figure { display: grid; gap: 8px; overflow-x: auto }
+.figure svg, .figure img, .figure video { width: 100%; height: auto; max-width: 100%; border-radius: 8px }
+.caption { font-size: 14px; color: var(--muted) }
+.term { border-bottom: 1px dotted var(--muted); cursor: help }
+
+.decision { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 14px; margin-inline: -8px }
+.options { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px }
+.option { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 6px; align-content: start; min-width: 0 }
+.option.recommended { border-color: var(--accent); background: var(--accent-soft) }
+.option .tag { font: 500 11px var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent) }
+.option dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0; font-size: 14px }
+.option dt { color: var(--muted) }
+.option dd { margin: 0 }
+.recommendation { border-left: 3px solid var(--accent); padding-left: 12px }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+button { font: 500 14px var(--font-body); border-radius: 8px; padding: 8px 14px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); cursor: pointer }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--bg) }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+button:disabled { opacity: 0.5; cursor: default }
+.status { font-size: 13px; color: var(--muted) }
+.risk { background: var(--warn-soft); border-radius: 8px; padding: 12px 14px }
+.risk strong { color: var(--warn) }
+dl.glossary { display: grid; grid-template-columns: minmax(120px, max-content) 1fr; gap: 10px 18px; margin: 0 }
+dl.glossary dt { font-weight: 600 }
+dl.glossary dd { margin: 0; min-width: 0 }
+@media (max-width: 520px) { dl.glossary { grid-template-columns: 1fr; gap: 2px } dl.glossary dd { margin-bottom: 10px } }
+
+[hidden] { display: none !important }
+#ask { position: absolute; z-index: 20; background: var(--fg); color: var(--bg); border: 0; box-shadow: 0 4px 14px rgb(0 0 0 / 0.2) }
+#hint { font-size: 13px; color: var(--muted) }
+</style>
+
+<main>
+  <header style="display:grid;gap:10px">
+    <span class="eyebrow">{{Anlass · Datum}}</span>
+    <h1>{{Name des Themas}}</h1>
+    <p id="hint">Text markieren und „An Claude“ drücken, um eine Rückfrage zu genau dieser Stelle zu stellen. Entscheidungen bestätigst du direkt in der jeweiligen Karte.</p>
+  </header>
+
+  <section class="tldr">
+    <span class="eyebrow">Kurz gesagt</span>
+    <p>{{Satz 1: worum es geht. Satz 2: Stand. Satz 3: was du entscheiden musst.}}</p>
+  </section>
+
+  <section>
+    <h2>In 30 Sekunden</h2>
+    {{Inhalt von VideoTemplate.html hier einfügen: Szenen und Sprechertexte an das Thema anpassen}}
+  </section>
+
+  <section>
+    <h2>Worum geht's</h2>
+    <p>{{Problem in Alltagssprache, konkreter Fall mit Link}}</p>
+  </section>
+
+  <section>
+    <h2>Wie es funktioniert</h2>
+    <div class="figure">
+      {{Inline-SVG-Diagramm}}
+      <p class="caption">{{Was man im Diagramm sehen soll}}</p>
+    </div>
+    <p>{{Erklärung}}</p>
+    <!-- Optional, nur mit Bild-API: -->
+    <div class="figure">
+      <img src="img/{{name}}.{{png oder jpg, wie die Datei heißt}}" alt="{{Was auf dem Bild zu sehen ist}}">
+      <p class="caption">{{Was man auf dem Bild sehen soll}}</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Was sich ändert</h2>
+    <p>{{Vorher → Nachher}}</p>
+  </section>
+
+  <section>
+    <h2>Zu entscheiden</h2>
+    <!-- One .decision per open decision. data-title / data-option are what gets sent to Claude. -->
+    <article class="decision" data-title="{{Kurzname der Entscheidung}}">
+      <h3>{{Die Frage, als Frage formuliert}}</h3>
+      <p>{{Warum diese Frage jetzt ansteht}}</p>
+      <div class="options">
+        <div class="option recommended" data-option="{{A: Kurzname}}">
+          <span class="tag">Empfehlung</span>
+          <strong>{{A: Kurzname}}</strong>
+          <dl><dt>Was passiert</dt><dd>{{…}}</dd><dt>Vorteil</dt><dd>{{…}}</dd><dt>Risiko</dt><dd>{{…}}</dd><dt>Aufwand</dt><dd>{{…}}</dd><dt>Umkehrbar</dt><dd>{{ja/nein}}</dd></dl>
+          <button type="button" data-choose>Diese Option wählen</button>
+        </div>
+        <div class="option" data-option="{{B: Kurzname}}">
+          <strong>{{B: Kurzname}}</strong>
+          <dl><dt>Was passiert</dt><dd>{{…}}</dd><dt>Vorteil</dt><dd>{{…}}</dd><dt>Risiko</dt><dd>{{…}}</dd><dt>Aufwand</dt><dd>{{…}}</dd><dt>Umkehrbar</dt><dd>{{ja/nein}}</dd></dl>
+          <button type="button" data-choose>Diese Option wählen</button>
+        </div>
+      </div>
+      <p class="recommendation"><strong>Meine Empfehlung:</strong> {{Option + 1–2 Sätze Begründung}}</p>
+      <div class="actions">
+        <button type="button" class="primary" data-accept>Empfehlung passt</button>
+        <button type="button" data-question>Rückfrage stellen</button>
+        <span class="status" role="status"></span>
+      </div>
+    </article>
+  </section>
+
+  <section>
+    <h2>Risiken &amp; offene Fragen</h2>
+    <p class="risk"><strong>{{Risiko}}:</strong> {{Erklärung + wie man es klärt}}</p>
+  </section>
+
+  <section>
+    <h2>Begriffe</h2>
+    <dl class="glossary">
+      <dt>{{Begriff}}</dt><dd>{{Klartext-Erklärung, Link}}</dd>
+    </dl>
+  </section>
+</main>
+
+<button id="ask" type="button" hidden>An Claude</button>
+
+<script>
+(async () => {
+  const ask = document.getElementById('ask')
+  const hint = document.getElementById('hint')
+  let comments = null
+  let canSend = 'off'
+  try { comments = await claude.use('comments') } catch {}
+  if (!comments) {
+    // Lokale Datei oder Ansicht ohne Kommentare: Rückkanal ausblenden, Rückfragen laufen über den Chat
+    hint.textContent = 'Rückfragen und Entscheidungen bitte direkt im Chat mit Claude.'
+    document.querySelectorAll('.decision .actions, [data-choose]').forEach(el => { el.hidden = true })
+    return
+  }
+  try { canSend = await comments.canSendToClaude() } catch {}
+
+  let range = null
+  document.addEventListener('mouseup', () => setTimeout(() => {
+    const sel = getSelection()
+    if (!sel || sel.isCollapsed || !sel.toString().trim() || ask.contains(sel.anchorNode)) { ask.hidden = true; return }
+    range = sel.getRangeAt(0).cloneRange()
+    const r = range.getBoundingClientRect()
+    ask.style.top = `${r.bottom + scrollY + 8}px`
+    ask.style.left = `${Math.max(16, Math.min(r.left + scrollX, innerWidth - 140))}px`
+    ask.hidden = false
+  }, 0))
+  ask.addEventListener('mousedown', e => e.preventDefault())
+  ask.addEventListener('click', async () => {
+    ask.hidden = true
+    if (range) await comments.openComposer({ range }).catch(() => {})
+  })
+
+  async function send(card, text, status) {
+    canSend = await comments.canSendToClaude().catch(() => 'off')
+    if (canSend !== 'available') {
+      status.textContent = 'Direktes Senden geht gerade nicht, ich öffne das Kommentarfeld.'
+      await comments.openComposer({ element: card }).catch(() => {})
+      return
+    }
+    status.textContent = 'Wird gesendet …'
+    try {
+      const anchor = await comments.anchorFor(card)
+      await comments.sendToClaude({ anchor, text })
+      status.textContent = 'An Claude gesendet. Die Antwort erscheint im Kommentar-Thread.'
+      card.querySelectorAll('button').forEach(b => { b.disabled = true })
+    } catch (e) {
+      status.textContent = e?.code === 'consent_required'
+        ? 'Nicht gesendet: Bitte erlaube der Seite das Kommentieren und versuch es noch einmal.'
+        : 'Nicht gesendet. Nutze „Rückfrage stellen“ als Ausweg.'
+    }
+  }
+
+  document.querySelectorAll('.decision').forEach(card => {
+    const title = card.dataset.title
+    const status = card.querySelector('.status')
+    const rec = card.querySelector('.option.recommended')?.dataset.option ?? ''
+    card.querySelector('[data-accept]')?.addEventListener('click', () =>
+      send(card, `Entscheidung „${title}“: Empfehlung passt (${rec}). Bitte so umsetzen.`, status))
+    card.querySelectorAll('[data-choose]').forEach(btn => btn.addEventListener('click', () => {
+      const opt = btn.closest('.option').dataset.option
+      send(card, `Entscheidung „${title}“: Ich nehme „${opt}“. Bitte so umsetzen.`, status)
+    }))
+    card.querySelector('[data-question]')?.addEventListener('click', () =>
+      comments.openComposer({ element: card }).catch(() => { status.textContent = 'Kommentarfeld ließ sich nicht öffnen.' }))
+  })
+})()
+</script>

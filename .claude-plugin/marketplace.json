@@ -1,6 +1,8 @@
 {
   "name": "f36-claude-exchange",
-  "owner": { "name": "F36" },
+  "owner": {
+    "name": "F36"
+  },
   "metadata": {
     "description": "Skills, die wir in F36 miteinander teilen. Jeder Skill ist ein eigenes Plugin und wird einzeln installiert."
   },
@@ -9,6 +11,11 @@
       "name": "skill-einreichen",
       "source": "./plugins/skill-einreichen",
       "description": "Verpackt einen deiner Skills als Plugin für den F36 Claude Exchange und bereitet den Pull Request vor."
+    },
+    {
+      "name": "explanation-builder",
+      "source": "./plugins/explanation-builder",
+      "description": "Baut dir per Interview deinen eigenen Explanation-Skill: Themen aus deinem Alltag als Seite mit Diagrammen, Bildern und Erklärvideo mit Sprecherstimme."
     }
   ]
 }
