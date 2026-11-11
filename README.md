@@ -38,6 +38,7 @@ Wer es automatisch will: in derselben Marketplace-Ansicht Auto-Update einschalte
 | Skill | Was er tut |
 |---|---|
 | `skill-einreichen` | Verpackt einen deiner Skills als Plugin für diesen Exchange und bereitet den Pull Request vor. |
+| `explanation-builder` | Baut dir per Interview deinen eigenen Explanation-Skill: Themen aus deinem Alltag als Seite mit Diagrammen, Bildern und Erklärvideo mit Sprecherstimme (ElevenLabs empfohlen, sonst OpenAI oder Gemini). |
 
 ## Einen Skill teilen
 

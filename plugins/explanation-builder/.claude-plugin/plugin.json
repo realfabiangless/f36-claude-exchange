@@ -1,0 +1,5 @@
+{
+  "name": "explanation-builder",
+  "description": "Baut dir per Interview deinen eigenen Explanation-Skill: Claude erklärt Themen aus deinem Alltag als Seite mit Diagrammen, Bildern und Erklärvideo mit Sprecherstimme.",
+  "author": { "name": "Fabian Gless" }
+}

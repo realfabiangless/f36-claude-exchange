@@ -1,0 +1,283 @@
+<!--
+  Erklärvideo-Baustein. In die Erklärseite an der Stelle "Erklärvideo" einfügen.
+  Braucht: GSAP (Script-Tag unten) und optional vo.js (Sprecherstimme, siehe VoiceOver.md).
+  Anpassen: Szenen (<section class="xv-sc">), ihre data-caption (= Sprechertext), die build-Funktionen in SCENES.
+  Alles mit Präfix xv- gehört zum Video und kollidiert nicht mit der Seite.
+-->
+<style>
+.xv { --xv-bg: #12111C; --xv-card: #1C1A2B; --xv-line: #2B2842; --xv-text: #F4F2FA; --xv-dim: #9C98B6;
+  --xv-a1: #4FE3C1; --xv-a2: #FFB547; --xv-a3: #FF6F61; --xv-a4: #8B7CFF;
+  --xv-display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif; --xv-body: "Inter", -apple-system, "Segoe UI", sans-serif; --xv-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  border: 1px solid var(--line, #DAD8E5); border-radius: 16px; overflow: hidden; background: var(--surface, #fff); }
+.xv-screen { position: relative; aspect-ratio: 16 / 9; max-width: 100%; background: var(--xv-bg); overflow: hidden; }
+.xv-screen:fullscreen { aspect-ratio: auto; width: 100vw; height: 100vh; }
+.xv-stage { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; transform-origin: 0 0; overflow: hidden; color: var(--xv-text); font-family: var(--xv-display);
+  background: radial-gradient(900px 600px at 80% 10%, color-mix(in srgb, var(--xv-a4) 30%, transparent) 0%, transparent 70%), radial-gradient(800px 600px at 10% 100%, color-mix(in srgb, var(--xv-a1) 14%, transparent) 0%, transparent 65%), var(--xv-bg); }
+.xv-stage * { box-sizing: border-box; }
+.xv-dots { position: absolute; inset: -40px; background-image: radial-gradient(rgba(255,255,255,.09) 1.4px, transparent 1.6px); background-size: 32px 32px; }
+.xv-grain { position: absolute; inset: 0; opacity: .06; mix-blend-mode: overlay; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.xv-vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.5) 100%); }
+.xv-sc { position: absolute; inset: 0; }
+.xv-abs { position: absolute; }
+.xv-mask { overflow: hidden; display: block; padding-bottom: .08em; }
+.xv-ch { display: inline-block; }
+.xv-w { display: inline-block; white-space: nowrap; }
+.xv-wipe { position: absolute; inset: 0; z-index: 8; pointer-events: none; }
+.xv-wipe b { position: absolute; top: -20%; height: 140%; width: 150%; left: -25%; visibility: hidden; }
+.xv-wipe b:nth-child(1) { background: var(--xv-a4); } .xv-wipe b:nth-child(2) { background: var(--xv-a1); } .xv-wipe b:nth-child(3) { background: var(--xv-card); }
+.xv-progress { position: absolute; right: 48px; top: 36px; display: flex; gap: 10px; z-index: 5; }
+.xv-progress i { width: 10px; height: 10px; border-radius: 5px; background: var(--xv-line); transition: width .35s cubic-bezier(.2,.9,.3,1.3), background-color .3s; }
+.xv-progress i.on { width: 34px; background: var(--xv-a1); }
+.xv-progress i.done { background: rgba(255,255,255,.35); }
+.xv-eyebrow { font-family: var(--xv-mono); font-size: 22px; color: var(--xv-a1); }
+.xv-h1 { font-size: 100px; font-weight: 700; letter-spacing: -.045em; line-height: 1; }
+.xv-h2 { font-size: 54px; font-weight: 700; letter-spacing: -.02em; }
+.xv-sub { font-family: var(--xv-body); font-size: 24px; color: var(--xv-dim); }
+.xv-node { position: absolute; width: 280px; height: 150px; border-radius: 24px; background: var(--xv-card); border: 1px solid var(--xv-line); display: grid; place-content: center; text-align: center; gap: 6px; }
+.xv-node b { font-size: 34px; } .xv-node span { font-family: var(--xv-body); font-size: 19px; color: var(--xv-dim); }
+.xv-bar { position: absolute; bottom: 160px; width: 150px; border-radius: 16px 16px 6px 6px; transform-origin: 50% 100%; }
+.xv-val { position: absolute; width: 150px; text-align: center; font-size: 46px; font-weight: 700; }
+.xv-lbl { position: absolute; width: 220px; text-align: center; font-family: var(--xv-body); font-size: 20px; color: var(--xv-dim); top: 572px; }
+.xv-kw { left: 0; right: 0; top: 300px; display: flex; justify-content: center; gap: 34px; font-size: 76px; font-weight: 700; letter-spacing: -.03em; }
+.xv-play { position: absolute; left: 50%; top: 88%; transform: translate(-50%, -50%); z-index: 20; display: flex; align-items: center; gap: 12px; padding: 14px 24px 14px 18px; border: 0; border-radius: 999px; background: var(--xv-a1); color: var(--xv-bg); font: 600 17px var(--xv-body); cursor: pointer; box-shadow: 0 12px 40px rgba(0,0,0,.45); }
+.xv-play[hidden] { display: none; }
+.xv-cap { min-height: 3.4em; padding: 14px 18px 2px; margin: 0; font-size: 16px; }
+.xv-ctrl { display: flex; align-items: center; gap: 8px; padding: 8px 18px 6px; flex-wrap: wrap; }
+.xv-ctrl button, .xv-chaps button { border: 1px solid var(--line, #DAD8E5); background: transparent; color: inherit; border-radius: 8px; height: 36px; min-width: 40px; padding: 0 12px; cursor: pointer; font: 500 14px var(--xv-body); }
+.xv-ctrl input { flex: 1 1 160px; min-width: 0; }
+.xv-time { font-family: var(--xv-mono); font-size: 13px; opacity: .7; font-variant-numeric: tabular-nums; }
+.xv-chaps { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 18px 16px; }
+.xv-chaps button { height: auto; border-radius: 999px; padding: 4px 12px; font-size: 13px; opacity: .75; }
+.xv-chaps button[aria-current="true"] { opacity: 1; border-color: currentColor; }
+.xv button:focus-visible, .xv input:focus-visible { outline: 3px solid var(--xv-a2); outline-offset: 2px; }
+</style>
+
+<div class="xv" id="xv">
+  <div class="xv-screen">
+    <div class="xv-stage" aria-hidden="true">
+      <div class="xv-dots"></div>
+      <div class="xv-progress"></div>
+
+      <!-- Szene 1: Titel. data-caption = Sprechertext dieser Szene. data-min = Mindestlänge in Sekunden. -->
+      <section class="xv-sc" data-name="Thema" data-min="4.5" data-caption="So entsteht bei uns ein Angebot. In drei Schritten und in zwei Tagen statt fünf.">
+        <div class="xv-abs xv-eyebrow" style="left:0;right:0;top:210px;text-align:center" id="xv-eb">Erklärt in 30 Sekunden</div>
+        <div class="xv-abs" style="left:0;right:0;top:254px;text-align:center"><div class="xv-mask"><div class="xv-h1 xv-split">Wie ein <span style="color:var(--xv-a1)">Angebot</span> entsteht</div></div></div>
+        <svg class="xv-abs" style="left:390px;top:400px;overflow:visible" width="500" height="40" viewBox="0 0 500 40"><path id="xv-sq" d="M6 22 C 60 4, 110 36, 170 20 S 280 4, 340 20 S 440 36, 494 16" fill="none" stroke="var(--xv-a2)" stroke-width="7" stroke-linecap="round"/></svg>
+      </section>
+
+      <!-- Szene 2: Ablauf als Diagramm -->
+      <section class="xv-sc" data-name="Ablauf" data-min="6" data-caption="Die Anfrage kommt rein, wir kalkulieren, und das Angebot geht raus. Jeder Schritt hat genau eine verantwortliche Person.">
+        <div class="xv-abs xv-h2" style="left:80px;top:90px" id="xv-s2h">Der Ablauf</div>
+        <div class="xv-node" style="left:80px;top:290px"><b>Anfrage</b><span>Vertrieb</span></div>
+        <div class="xv-node" style="left:500px;top:290px"><b>Kalkulation</b><span>Controlling</span></div>
+        <div class="xv-node" style="left:920px;top:290px;border-color:var(--xv-a2)"><b>Angebot</b><span>Vertrieb</span></div>
+        <svg class="xv-abs" style="left:0;top:0;overflow:visible" width="1280" height="720" viewBox="0 0 1280 720">
+          <path class="xv-link" d="M368 365 L492 365" stroke="var(--xv-text)" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <path class="xv-link" d="M788 365 L912 365" stroke="var(--xv-text)" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <path id="xv-route" d="M220 470 C 420 560, 860 560, 1060 470" fill="none" stroke="var(--xv-line)" stroke-width="3" stroke-dasharray="4 10"/>
+          <circle id="xv-dot" r="12" fill="var(--xv-a2)"/>
+        </svg>
+      </section>
+
+      <!-- Szene 3: Zahlen -->
+      <section class="xv-sc" data-name="Zahlen" data-min="6" data-caption="Früher hat das im Schnitt fünf Tage gedauert. Heute sind es zwei.">
+        <div class="xv-abs xv-h2" style="left:80px;top:90px" id="xv-s3h">Tage bis zum Angebot</div>
+        <div class="xv-bar" style="left:430px;height:300px;background:var(--xv-line)"></div>
+        <div class="xv-bar" style="left:700px;height:120px;background:var(--xv-a1)"></div>
+        <div class="xv-val" style="left:430px;top:196px" data-to="5">0</div>
+        <div class="xv-val" style="left:700px;top:376px;color:var(--xv-a1)" data-to="2">0</div>
+        <div class="xv-lbl" style="left:395px">vorher</div>
+        <div class="xv-lbl" style="left:665px">heute</div>
+      </section>
+
+      <!-- Szene 4: Fazit -->
+      <section class="xv-sc" data-name="Fazit" data-min="4.5" data-caption="Klarer Ablauf, klare Zuständigkeit, schnelleres Angebot.">
+        <div class="xv-abs xv-kw"><div class="xv-mask"><div class="xv-kwi" style="color:var(--xv-a1)">Klar.</div></div><div class="xv-mask"><div class="xv-kwi" style="color:var(--xv-a2)">Zuständig.</div></div><div class="xv-mask"><div class="xv-kwi" style="color:var(--xv-a3)">Schneller.</div></div></div>
+        <div class="xv-abs xv-sub" style="left:0;right:0;top:430px;text-align:center" id="xv-out">Drei Schritte, zwei Tage.</div>
+      </section>
+
+      <div class="xv-wipe"><b></b><b></b><b></b></div>
+      <div class="xv-grain"></div><div class="xv-vig"></div>
+    </div>
+    <button class="xv-play" type="button"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 2 L4 14 L14 8 Z" fill="currentColor"/></svg>Abspielen</button>
+  </div>
+  <p class="xv-cap" aria-live="polite"></p>
+  <div class="xv-ctrl">
+    <button type="button" data-xv="play" aria-label="Abspielen">▶</button>
+    <button type="button" data-xv="restart" aria-label="Von vorn">↺</button>
+    <button type="button" data-xv="mute" aria-pressed="false">Ton an</button>
+    <button type="button" data-xv="fs" aria-label="Vollbild">⛶</button>
+    <input type="range" min="0" step="0.02" value="0" aria-label="Position im Video" data-xv="scrub">
+    <span class="xv-time">0:00</span>
+  </div>
+  <div class="xv-chaps" aria-label="Kapitel"></div>
+</div>
+
+<script src="vo.js" onerror="window.VO = window.VO || []"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(function () {
+  var root = document.getElementById("xv");
+  var $ = function (s) { return root.querySelector(s); }, $$ = function (s) { return Array.prototype.slice.call(root.querySelectorAll(s)); };
+  var screen = $(".xv-screen"), stage = $(".xv-stage");
+  gsap.config({ force3D: false });
+
+  // ===== Helfer =====
+  function fit() { var w = screen.clientWidth, h = screen.clientHeight, k = Math.min(w / 1280, h / 720); stage.style.transform = "translate(" + (w - 1280 * k) / 2 + "px," + (h - 720 * k) / 2 + "px) scale(" + k + ")"; }
+  fit(); if (window.ResizeObserver) new ResizeObserver(fit).observe(screen); else addEventListener("resize", fit);
+  // .xv-split: Text in einzelne Buchstaben zerlegen (Kind-Elemente wie <span style=color> bleiben erhalten)
+  $$(".xv-split").forEach(function (el) {
+    (function walk(node) {
+      Array.prototype.slice.call(node.childNodes).forEach(function (n) {
+        if (n.nodeType === 3) {
+          var f = document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach(function (part) {
+            if (!part) return;
+            if (/^\s+$/.test(part)) { f.appendChild(document.createTextNode(" ")); return; }
+            var w = document.createElement("span"); w.className = "xv-w";
+            part.split("").forEach(function (c) { var s = document.createElement("span"); s.className = "xv-ch"; s.textContent = c; w.appendChild(s); });
+            f.appendChild(w);
+          });
+          n.replaceWith(f);
+        }
+        else if (n.nodeType === 1) walk(n);
+      });
+    })(el);
+  });
+  function chars(sc, sel) { return sc.querySelectorAll((sel || ".xv-split") + " .xv-ch"); }
+  function draw(el) { var L = el.getTotalLength(); el.style.strokeDasharray = L + " " + L; el.style.strokeDashoffset = L; return L; }
+  var binds = []; // Funktionen, die bei jedem Bild laufen (Zähler, Punkte auf Pfaden)
+
+  // ===== Szenen: build(tl, T, sc) baut die Animation ab Startzeit T. sfx: [Sekunde in der Szene, Effekt] =====
+  var SCENES = [
+    { sfx: [[0.6, "pop"], [1.5, "chime"]], build: function (tl, T, sc) {
+      tl.from(sc.querySelector("#xv-eb"), { opacity: 0, y: 14, duration: 0.6 }, T + 0.1)
+        .from(chars(sc), { yPercent: 115, duration: 0.9, stagger: 0.03, ease: "power4.out" }, T + 0.35);
+      var sq = sc.querySelector("#xv-sq"); draw(sq);
+      tl.to(sq, { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }, T + 1.4);
+    } },
+    { sfx: [[0.6, "pop", 520], [1.0, "pop", 640], [1.4, "pop", 760], [3.4, "chime"]], build: function (tl, T, sc) {
+      tl.from(sc.querySelector("#xv-s2h"), { x: -40, opacity: 0, duration: 0.7 }, T + 0.1)
+        .from(sc.querySelectorAll(".xv-node"), { scale: 0.5, opacity: 0, duration: 0.6, stagger: 0.4, ease: "back.out(2.2)" }, T + 0.6);
+      sc.querySelectorAll(".xv-link").forEach(function (p, i) { draw(p); tl.to(p, { strokeDashoffset: 0, duration: 0.35 }, T + 0.85 + i * 0.4); });
+      var route = sc.querySelector("#xv-route"), dot = sc.querySelector("#xv-dot"), L = route.getTotalLength(), P = { p: 0 };
+      tl.from(route, { opacity: 0, duration: 0.4 }, T + 1.9).to(P, { p: 1, duration: 1.6, ease: "power2.inOut" }, T + 2.0);
+      binds.push(function () { var pt = route.getPointAtLength(L * P.p); dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y); dot.style.opacity = P.p > 0 && P.p < 1 ? 1 : 0; });
+    } },
+    { sfx: [[0.6, "tick"], [1.0, "tick"], [2.6, "chime"]], build: function (tl, T, sc) {
+      tl.from(sc.querySelector("#xv-s3h"), { x: -40, opacity: 0, duration: 0.7 }, T + 0.1)
+        .from(sc.querySelectorAll(".xv-bar"), { scaleY: 0, duration: 1.1, stagger: 0.5, ease: "expo.out" }, T + 0.5)
+        .from(sc.querySelectorAll(".xv-lbl"), { opacity: 0, y: 10, duration: 0.5, stagger: 0.5 }, T + 0.6);
+      sc.querySelectorAll(".xv-val").forEach(function (v, i) {
+        var C = { n: 0 }, to = +v.dataset.to;
+        tl.from(v, { opacity: 0, duration: 0.3 }, T + 0.5 + i * 0.5).to(C, { n: to, duration: 1.0, ease: "power2.out" }, T + 0.5 + i * 0.5);
+        binds.push(function () { var s = String(Math.round(C.n)); if (v.textContent !== s) v.textContent = s; });
+      });
+    } },
+    { sfx: [[0.3, "pop", 600], [0.5, "pop", 750], [0.7, "pop", 900]], build: function (tl, T, sc) {
+      tl.from(sc.querySelectorAll(".xv-kwi"), { yPercent: 110, duration: 0.7, stagger: 0.2, ease: "power4.out" }, T + 0.3)
+        .from(sc.querySelector("#xv-out"), { opacity: 0, y: 12, duration: 0.6 }, T + 1.3);
+    } }
+  ];
+
+  // ===== Motor: Länge jeder Szene = max(Mindestlänge, Sprecherclip + Puffer) =====
+  var scEls = $$(".xv-sc"), VO = window.VO || [];
+  var clips = scEls.map(function (_, i) { if (!VO[i]) return null; var a = new Audio(); a.preload = "auto"; a.src = VO[i]; return a; });
+  var meta = clips.map(function (a) { return a ? new Promise(function (res) { if (a.readyState >= 1) return res(); a.addEventListener("loadedmetadata", res, { once: true }); a.addEventListener("error", res, { once: true }); setTimeout(res, 4000); }) : Promise.resolve(); });
+  Promise.all(meta).then(init);
+
+  function init() {
+    var t = 0, starts = [], voAt = [];
+    scEls.forEach(function (sc, i) {
+      var vd = clips[i] && isFinite(clips[i].duration) ? clips[i].duration : 0;
+      starts.push(t); voAt.push(t + 0.3);
+      t += Math.max(+sc.dataset.min || 4, vd + 1.0);
+    });
+    var END = t;
+    var prog = $(".xv-progress"); scEls.forEach(function () { prog.appendChild(document.createElement("i")); });
+    var dotsEls = $$(".xv-progress i");
+
+    gsap.set(scEls.slice(1), { autoAlpha: 0 });
+    gsap.set(".xv-wipe b", { skewX: -14, xPercent: -120, autoAlpha: 1 });
+    var tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+    var cues = [];
+    scEls.forEach(function (sc, i) {
+      var T = starts[i];
+      if (i > 0) {
+        tl.fromTo(root.querySelectorAll(".xv-wipe b"), { xPercent: -120 }, { xPercent: 120, duration: 0.9, stagger: 0.07, ease: "power3.inOut", immediateRender: false }, T - 0.45);
+        tl.set(scEls[i - 1], { autoAlpha: 0 }, T).set(sc, { autoAlpha: 1 }, T);
+        cues.push([T - 0.4, "whoosh"]);
+      }
+      if (SCENES[i]) { SCENES[i].build(tl, T + (i > 0 ? 0.2 : 0), sc); (SCENES[i].sfx || []).forEach(function (c) { cues.push([T + c[0], c[1], c[2]]); }); }
+    });
+    tl.to({}, { duration: 0.01 }, END - 0.01);
+
+    // ----- Ton: Sprecher + Effekte aus Web Audio -----
+    var muted = false, cur = -1, ac = null, out = null, noise = null;
+    function stopVo() { clips.forEach(function (a) { if (a) a.pause(); }); cur = -1; }
+    function syncVo(t) {
+      if (!playing || muted) { if (cur !== -1) stopVo(); return; }
+      var k = -1; clips.forEach(function (a, i) { if (a && t >= voAt[i] && t < voAt[i] + (a.duration || 0)) k = i; });
+      if (k !== cur) { stopVo(); cur = k; if (k >= 0) { try { clips[k].currentTime = t - voAt[k]; } catch (e) {} clips[k].play().catch(function () {}); } }
+      else if (k >= 0 && Math.abs(clips[k].currentTime - (t - voAt[k])) > 0.3) { try { clips[k].currentTime = t - voAt[k]; } catch (e) {} }
+    }
+    function env(g, t0, a, p, d) { g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(p, t0 + a); g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d); }
+    function osc(type, f1, f2, a, p, d) { var t0 = ac.currentTime, o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.setValueAtTime(f1, t0); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + a + d * 0.5); env(g, t0, a, p, d); o.connect(g).connect(out); o.start(t0); o.stop(t0 + a + d + 0.05); }
+    var SFX = {
+      pop: function (f) { osc("sine", f || 520, (f || 520) * 1.7, 0.008, 0.5, 0.12); },
+      tick: function () { osc("triangle", 1500, 0, 0.003, 0.25, 0.04); },
+      thump: function () { osc("sine", 160, 55, 0.005, 0.7, 0.22); },
+      chime: function () { [880, 1320, 1760].forEach(function (f, i) { setTimeout(function () { osc("sine", f, 0, 0.01, 0.28 / (i + 1), 0.7); }, i * 40); }); },
+      whoosh: function () {
+        if (!noise) { noise = ac.createBuffer(1, ac.sampleRate, ac.sampleRate); var d = noise.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+        var t0 = ac.currentTime, s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain(); s.buffer = noise; f.type = "bandpass"; f.Q.value = 0.9;
+        f.frequency.setValueAtTime(300, t0); f.frequency.exponentialRampToValueAtTime(2600, t0 + 0.35); f.frequency.exponentialRampToValueAtTime(500, t0 + 0.8);
+        env(g, t0, 0.3, 0.55, 0.5); s.connect(f).connect(g).connect(out); s.start(t0); s.stop(t0 + 0.9);
+      }
+    };
+    function fire(a, b) { if (muted || !ac || b <= a || b - a > 0.5) return; cues.forEach(function (c) { if (c[0] > a && c[0] <= b) try { SFX[c[1]](c[2]); } catch (e) {} }); }
+
+    // ----- Steuerung -----
+    var cap = $(".xv-cap"), scrub = $("[data-xv=scrub]"), timeEl = $(".xv-time"), playBtn = $("[data-xv=play]"), big = $(".xv-play");
+    scrub.max = END.toFixed(2);
+    var chaps = scEls.map(function (sc, i) { var b = document.createElement("button"); b.type = "button"; b.textContent = sc.dataset.name || "Szene " + (i + 1); b.addEventListener("click", function () { seek(starts[i] + 0.01); if (!playing) play(); }); $(".xv-chaps").appendChild(b); return b; });
+    function fmt(x) { var s = Math.floor(x); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+    var playing = false, raf = 0, last = 0, prev = 0;
+    function render() {
+      var t = tl.time(), k = 0; starts.forEach(function (s, i) { if (t >= s - 0.05) k = i; });
+      binds.forEach(function (f) { f(); });
+      var c = scEls[k].dataset.caption || ""; if (cap.textContent !== c) cap.textContent = c;
+      dotsEls.forEach(function (d, i) { d.classList.toggle("on", i === k); d.classList.toggle("done", i < k); });
+      chaps.forEach(function (b, i) { b.setAttribute("aria-current", i === k ? "true" : "false"); });
+      syncVo(t); scrub.value = t.toFixed(2); timeEl.textContent = fmt(t) + " / " + fmt(END);
+    }
+    function loop(ts) {
+      if (!playing) return;
+      var dt = last ? (ts - last) / 1000 : 0; last = ts;
+      var t = Math.min(END, tl.time() + dt); fire(prev, t); prev = t; tl.seek(t, false); render();
+      if (t >= END) return pause();
+      raf = requestAnimationFrame(loop);
+    }
+    function play() {
+      if (!ac) { var C = window.AudioContext || window.webkitAudioContext; if (C) { ac = new C(); out = ac.createGain(); out.gain.value = 0.22; out.connect(ac.destination); } }
+      if (ac && ac.state === "suspended") ac.resume();
+      if (tl.time() >= END - 0.05) tl.seek(0, true);
+      playing = true; last = 0; prev = tl.time(); big.hidden = true; playBtn.textContent = "❚❚"; playBtn.setAttribute("aria-label", "Pause");
+      raf = requestAnimationFrame(loop);
+    }
+    function pause() { playing = false; cancelAnimationFrame(raf); stopVo(); playBtn.textContent = "▶"; playBtn.setAttribute("aria-label", "Abspielen"); }
+    function seek(x) { stopVo(); tl.seek(Math.max(0, Math.min(END, x)), true); prev = tl.time(); render(); }
+    playBtn.addEventListener("click", function () { playing ? pause() : play(); });
+    big.addEventListener("click", play);
+    $("[data-xv=restart]").addEventListener("click", function () { seek(0); play(); });
+    scrub.addEventListener("input", function () { big.hidden = true; seek(parseFloat(scrub.value)); });
+    $("[data-xv=mute]").addEventListener("click", function () { muted = !muted; this.textContent = muted ? "Ton aus" : "Ton an"; this.setAttribute("aria-pressed", String(muted)); stopVo(); render(); });
+    $("[data-xv=fs]").addEventListener("click", function () { try { var p = screen.requestFullscreen && screen.requestFullscreen(); if (p && p.catch) p.catch(function () {}); } catch (e) {} });
+    document.addEventListener("fullscreenchange", fit);
+    if (!clips.some(Boolean)) big.lastChild.textContent = "Abspielen (ohne Stimme)";
+    else big.lastChild.textContent = "Abspielen · " + Math.round(END) + " s mit Ton";
+    // Ruhebild: Titel fertig aufgebaut
+    seek(Math.min(starts[1] || END, 2.6) - 0.05);
+  }
+})();
+</script>
